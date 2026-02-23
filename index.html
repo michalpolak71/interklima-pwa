@@ -497,13 +497,19 @@ async function sendWebhook(type, lat, lon, extra) {
     ...extra
   };
 
-  const resp = await fetch(WEBHOOK, {
-    method: 'POST',
-    headers: {'Content-Type':'text/plain'},
-    body: JSON.stringify(body),
-    redirect: 'follow'
-  });
-  return resp.ok;
+  // Apps Script redirect wymaga no-cors na iPhone Safari
+  try {
+    await fetch(WEBHOOK, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {'Content-Type':'text/plain'},
+      body: JSON.stringify(body)
+    });
+    return true;
+  } catch(e) {
+    console.error('Webhook error:', e);
+    return false;
+  }
 }
 
 // === ACTIONS ===
@@ -511,7 +517,14 @@ async function doStart() {
   if (!phone) { toast('Wpisz numer w Ustawieniach','err'); return; }
   updateUI('sending');
   try {
-    const pos = await getPosition();
+    let pos;
+    try {
+      pos = await getPosition();
+    } catch(gpsErr) {
+      // Jesli GPS nie dziala, wyslij bez lokalizacji
+      pos = { lat: 0, lon: 0 };
+      toast('GPS niedost\u0119pny - wysy\u0142am bez lokalizacji','err');
+    }
     await sendWebhook('START', pos.lat, pos.lon);
     startTime = new Date();
     totalBreakMs = 0;
@@ -535,7 +548,8 @@ async function doStop() {
       closeDialog();
       updateUI('sending');
       try {
-        const pos = await getPosition();
+        let pos;
+        try { pos = await getPosition(); } catch(e) { pos = {lat:0,lon:0}; }
         await sendWebhook('STOP', pos.lat, pos.lon);
         clearInterval(timerInterval);
         clearInterval(pingInterval);
@@ -555,7 +569,8 @@ async function doStop() {
 async function doBreak() {
   updateUI('sending');
   try {
-    const pos = await getPosition();
+    let pos;
+    try { pos = await getPosition(); } catch(e) { pos = {lat:0,lon:0}; }
     await sendWebhook('PRZERWA', pos.lat, pos.lon);
     breakStartTime = new Date();
     state = 'onBreak';
@@ -570,7 +585,8 @@ async function doBreak() {
 async function doEndBreak() {
   updateUI('sending');
   try {
-    const pos = await getPosition();
+    let pos;
+    try { pos = await getPosition(); } catch(e) { pos = {lat:0,lon:0}; }
     await sendWebhook('KONIEC_PRZERWY', pos.lat, pos.lon);
     if (breakStartTime) totalBreakMs += (Date.now() - breakStartTime.getTime());
     breakStartTime = null;
@@ -644,17 +660,21 @@ function startPing() {
 async function checkLeaveStatus() {
   if (!phone) return;
   try {
-    const resp = await fetch(WEBHOOK+'?action=CHECK_URLOP&phone='+phone, {redirect:'follow'});
-    const text = await resp.text();
-    if (text.includes('"notification"')) {
-      const data = JSON.parse(text);
-      if (data.notification && data.notification.length > 0) {
-        showDialog('Wniosek urlopowy', data.notification, [
-          { text: 'OK', action: () => closeDialog() }
-        ]);
+    const resp = await fetch(WEBHOOK+'?action=CHECK_URLOP&phone='+phone, {redirect:'follow',mode:'cors'});
+    if (resp.ok) {
+      const text = await resp.text();
+      if (text.includes('"notification"')) {
+        const data = JSON.parse(text);
+        if (data.notification && data.notification.length > 0) {
+          showDialog('Wniosek urlopowy', data.notification, [
+            { text: 'OK', action: () => closeDialog() }
+          ]);
+        }
       }
     }
-  } catch(e) {}
+  } catch(e) {
+    // GET moze nie dzialac z CORS - cichy blad
+  }
 }
 
 // === UI UPDATE ===
