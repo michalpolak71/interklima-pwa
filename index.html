@@ -11,855 +11,164 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
-/* System fonts - no external loading */
-
 *{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#0F1923;--card:#1B2838;--card2:#1B3A5C;
-  --green:#4CAF50;--red:#E53935;--orange:#FFA726;--blue:#4FC3F7;
-  --text:#fff;--text2:rgba(255,255,255,.7);--text3:rgba(255,255,255,.38);
-}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);
-  min-height:100vh;min-height:100dvh;overflow-x:hidden;
-  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
+:root{--bg:#0F1923;--card:#1B2838;--card2:#1B3A5C;--green:#4CAF50;--red:#E53935;--orange:#FFA726;--blue:#4FC3F7;--text:#fff;--text2:rgba(255,255,255,.7);--text3:rgba(255,255,255,.38)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;min-height:100dvh;overflow-x:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 .app{max-width:480px;margin:0 auto;padding:16px 20px;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
-
-/* Header */
 .header{display:flex;align-items:center;justify-content:space-between;padding:8px 0 16px}
-.header h1{font-size:16px;font-weight:600;letter-spacing:.5px}
-.menu-btn{background:none;border:none;color:var(--text2);font-size:24px;cursor:pointer;padding:8px}
-
-/* Logo */
+.header h1{font-size:16px;font-weight:600}
+.menu-btn{background:none;border:none;color:var(--text2);font-size:24px;cursor:pointer;padding:8px;-webkit-tap-highlight-color:transparent}
 .logo-wrap{text-align:center;padding:8px 0 20px}
 .logo-wrap img{height:60px;opacity:.9}
-
-/* Status badge */
-.status-badge{
-  display:inline-flex;align-items:center;gap:8px;
-  padding:8px 16px;border-radius:12px;font-size:13px;font-weight:600;
-  margin:0 auto 28px;
-}
+.status-badge{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;border-radius:12px;font-size:13px;font-weight:600;margin:0 auto 28px}
 .status-badge.in{background:rgba(76,175,80,.15);color:var(--green);border:1px solid rgba(76,175,80,.3)}
 .status-badge.out{background:rgba(255,167,38,.15);color:var(--orange);border:1px solid rgba(255,167,38,.3)}
 .status-badge.off{background:rgba(233,57,53,.15);color:var(--red);border:1px solid rgba(233,57,53,.3)}
 .status-badge.loading{background:rgba(255,255,255,.05);color:var(--text3);border:1px solid rgba(255,255,255,.1)}
-
-/* Timer */
-.timer-card{
-  background:var(--card);border-radius:20px;padding:28px 24px;text-align:center;
-  margin-bottom:32px;position:relative;overflow:hidden;
-}
-.timer-card::before{
-  content:'';position:absolute;inset:0;border-radius:20px;
-  box-shadow:0 0 40px var(--glow,rgba(100,100,120,.1));pointer-events:none;
-}
-.timer-card.working{--glow:rgba(76,175,80,.2)}
-.timer-card.break{--glow:rgba(255,167,38,.2)}
+.timer-card{background:var(--card);border-radius:20px;padding:28px 24px;text-align:center;margin-bottom:32px}
+.timer-card.working{box-shadow:0 0 40px rgba(76,175,80,.15)}
+.timer-card.break{box-shadow:0 0 40px rgba(255,167,38,.15)}
 .state-label{font-size:12px;font-weight:600;letter-spacing:3px;margin-bottom:12px}
-.state-label.idle{color:var(--text3)}
-.state-label.working{color:var(--green)}
-.state-label.break{color:var(--orange)}
-.timer{font-family:'Courier New',monospace;font-size:52px;font-weight:300;letter-spacing:4px}
+.state-label.idle{color:var(--text3)}.state-label.working{color:var(--green)}.state-label.break{color:var(--orange)}
+.timer{font-family:'Courier New',monospace;font-size:48px;font-weight:300;letter-spacing:4px}
 .timer.idle{color:var(--text3)}
-
-/* Break timer */
-.break-timer{
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  background:rgba(255,167,38,.12);border-radius:10px;padding:8px 16px;margin-top:12px;
-}
-.break-timer .icon{font-size:18px}
-.break-timer .time{font-family:'Courier New',monospace;font-size:22px;font-weight:600;color:var(--orange)}
-.break-info{font-size:11px;color:var(--text3);margin-top:6px}
-.break-info.warn{color:#ef5350}
-
-/* Buttons */
-.actions{display:flex;flex-direction:column;gap:12px;flex:1}
-.btn{
-  width:100%;border:none;border-radius:16px;font-family:inherit;
-  font-weight:700;letter-spacing:1.5px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  transition:transform .1s,opacity .1s;
-}
-.btn:active{transform:scale(.97);opacity:.85}
-.btn.big{height:72px;font-size:18px}
-.btn.small{height:52px;font-size:14px}
-.btn.start{background:var(--green);color:#fff}
-.btn.stop{background:var(--red);color:#fff}
-.btn.pause{background:var(--orange);color:#fff}
-.btn:disabled{opacity:.5;pointer-events:none}
-
-/* Spinner */
-.spinner{text-align:center;padding:24px}
-.spinner .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--blue);margin:0 4px;animation:bounce .6s infinite alternate}
-.spinner .dot:nth-child(2){animation-delay:.2s}
-.spinner .dot:nth-child(3){animation-delay:.4s}
-@keyframes bounce{to{transform:translateY(-12px);opacity:.3}}
-.spinner p{color:var(--text3);margin-top:12px;font-size:13px}
-
-/* Menu overlay */
-.menu-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;
-  opacity:0;pointer-events:none;transition:opacity .25s;
-}
-.menu-overlay.open{opacity:1;pointer-events:auto}
-.menu-panel{
-  position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--card);z-index:101;
-  transform:translateX(-100%);transition:transform .3s ease;padding:0;
-  display:flex;flex-direction:column;
-}
-.menu-overlay.open .menu-panel{transform:translateX(0)}
-.menu-header{
-  background:linear-gradient(135deg,var(--card2),var(--bg));
-  padding:48px 20px 20px;
-}
-.menu-header img{height:40px;margin-bottom:10px}
-.menu-header p{color:var(--text2);font-size:13px}
-.menu-item{
-  display:flex;align-items:center;gap:14px;padding:14px 20px;
-  color:var(--text);font-size:14px;cursor:pointer;border:none;background:none;width:100%;text-align:left;
-}
-.menu-item:hover{background:rgba(255,255,255,.05)}
-.menu-item .mi{font-size:20px;width:24px;text-align:center;opacity:.6}
-.menu-divider{height:1px;background:rgba(255,255,255,.08);margin:4px 0}
-
-/* Screens */
-.screen{display:none;flex-direction:column;flex:1}
-.screen.active{display:flex}
-
-/* Settings */
-.settings-wrap{padding:4px 0}
-.settings-wrap label{display:block;color:var(--text2);font-size:14px;font-weight:600;margin-bottom:6px}
-.settings-wrap .hint{color:var(--text3);font-size:12px;margin-bottom:14px}
-.phone-input{
-  width:100%;background:var(--card);border:1px solid rgba(255,255,255,.1);
-  border-radius:12px;padding:14px 16px;color:#fff;font-size:18px;
-  font-family:'Courier New',monospace;outline:none;
-}
-.phone-input:focus{border-color:var(--blue)}
-.save-msg{
-  background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.25);
-  border-radius:10px;padding:10px 12px;margin-top:14px;
-  display:flex;align-items:center;gap:8px;color:var(--green);font-size:12px;
-}
-
-/* Holidays */
-.holiday-item{
-  display:flex;align-items:center;gap:14px;
-  background:var(--card);border-radius:12px;padding:12px 16px;margin-bottom:8px;
-}
-.holiday-item.past{opacity:.4}
-.holiday-day{
-  width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;
-  font-size:18px;font-weight:700;
-}
-.holiday-day.future{background:rgba(233,57,53,.12);color:#ef5350}
-.holiday-day.past{background:rgba(255,255,255,.04);color:var(--text3)}
-.holiday-name{font-weight:600;font-size:14px}
-.holiday-date{color:var(--text3);font-size:12px;margin-top:2px}
-
-/* Leave request */
-.form-group{margin-bottom:16px}
-.form-group label{display:block;color:var(--text2);font-size:13px;font-weight:600;margin-bottom:6px}
-.form-select,.form-input,.form-textarea{
-  width:100%;background:var(--card);border:1px solid rgba(255,255,255,.1);
-  border-radius:10px;padding:12px 14px;color:#fff;font-size:14px;
-  font-family:inherit;outline:none;
-}
-.form-select:focus,.form-input:focus,.form-textarea:focus{border-color:var(--blue)}
-.form-textarea{min-height:80px;resize:vertical}
-.form-select option{background:var(--card)}
-
-/* Leave approval */
-.approval-card{
-  background:var(--card);border-radius:14px;padding:16px;margin-bottom:12px;
-  border:1px solid rgba(255,255,255,.06);
-}
-.approval-card.new-req{border-color:rgba(255,167,38,.3)}
-.approval-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
-.approval-name{font-weight:700;font-size:15px}
-.approval-status{
-  font-size:11px;font-weight:700;padding:3px 10px;border-radius:8px;
-}
-.approval-status.nowy{background:rgba(255,167,38,.15);color:var(--orange)}
-.approval-status.zatwierdzony{background:rgba(76,175,80,.15);color:var(--green)}
-.approval-status.odrzucony{background:rgba(233,57,53,.15);color:var(--red)}
-.approval-info{display:flex;align-items:center;gap:6px;color:var(--text2);font-size:12px;margin-top:4px}
-.approval-info .ai{opacity:.5;font-size:14px}
-.approval-btns{display:flex;gap:10px;margin-top:12px}
-.approval-btns .btn{height:40px;font-size:13px;border-radius:10px;flex:1}
-
-/* Back button */
-.back-bar{display:flex;align-items:center;gap:10px;padding:8px 0 16px}
-.back-btn{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;padding:4px 8px}
-.back-bar h2{font-size:16px;font-weight:600}
-
-/* Dialog */
-.dialog-overlay{
-  position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;
-  display:none;align-items:center;justify-content:center;padding:20px;
-}
-.dialog-overlay.open{display:flex}
-.dialog{
-  background:var(--card);border-radius:16px;padding:24px;max-width:340px;width:100%;
-}
-.dialog h3{font-size:16px;margin-bottom:10px}
-.dialog p{color:var(--text2);font-size:14px;margin-bottom:18px}
-.dialog-btns{display:flex;gap:10px;justify-content:flex-end}
-.dialog-btns button{
-  background:none;border:none;color:var(--blue);font-family:inherit;
-  font-size:14px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px;
-}
-.dialog-btns button:hover{background:rgba(79,195,247,.1)}
-.dialog-btns button.danger{color:var(--red)}
-
-/* Toast */
-.toast{
-  position:fixed;bottom:80px;left:50%;transform:translateX(-50%);
-  padding:12px 24px;border-radius:12px;font-size:13px;font-weight:600;
-  z-index:300;opacity:0;transition:opacity .3s;pointer-events:none;
-}
-.toast.show{opacity:1}
-.toast.ok{background:rgba(76,175,80,.9);color:#fff}
-.toast.err{background:rgba(233,57,53,.9);color:#fff}
+.break-box{background:rgba(255,167,38,.12);border-radius:10px;padding:8px 16px;margin-top:12px;text-align:center}
+.break-box .bt{font-family:'Courier New',monospace;font-size:22px;font-weight:600;color:var(--orange)}
+.break-box .bi{font-size:11px;color:var(--text3);margin-top:4px}.break-box .bi.w{color:#ef5350}
+.actions{display:flex;flex-direction:column;gap:12px}
+.btn{width:100%;border:none;border-radius:16px;font-family:inherit;font-weight:700;letter-spacing:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;-webkit-tap-highlight-color:transparent;transition:transform .1s}
+.btn:active{transform:scale(.97)}
+.btn.big{height:68px;font-size:17px}.btn.sm{height:50px;font-size:14px}
+.btn.green{background:var(--green);color:#fff}.btn.red{background:var(--red);color:#fff}.btn.orange{background:var(--orange);color:#fff}.btn.blue{background:var(--blue);color:#000}
+.btn:disabled{opacity:.4}
+.spin{text-align:center;padding:24px}.spin p{color:var(--text3);margin-top:10px;font-size:13px}
+.spin .d{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--blue);margin:0 3px;animation:b .6s infinite alternate}
+.spin .d:nth-child(2){animation-delay:.2s}.spin .d:nth-child(3){animation-delay:.4s}
+@keyframes b{to{transform:translateY(-10px);opacity:.3}}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;opacity:0;pointer-events:none;transition:opacity .25s}
+.overlay.open{opacity:1;pointer-events:auto}
+.panel{position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--card);z-index:101;transform:translateX(-100%);transition:transform .3s;display:flex;flex-direction:column;overflow-y:auto}
+.overlay.open .panel{transform:translateX(0)}
+.panel-hdr{background:linear-gradient(135deg,var(--card2),var(--bg));padding:48px 20px 20px}
+.panel-hdr img{height:40px;margin-bottom:10px}.panel-hdr p{color:var(--text2);font-size:13px}
+.mi{display:flex;align-items:center;gap:14px;padding:14px 20px;color:var(--text);font-size:14px;cursor:pointer;border:none;background:none;width:100%;text-align:left;-webkit-tap-highlight-color:transparent}
+.mi:active{background:rgba(255,255,255,.05)}
+.mi i{font-style:normal;font-size:18px;width:24px;text-align:center;opacity:.6}
+.divider{height:1px;background:rgba(255,255,255,.08);margin:4px 0}
+.scr{display:none;flex-direction:column;flex:1}.scr.on{display:flex}
+.topbar{display:flex;align-items:center;gap:10px;padding:8px 0 16px}
+.topbar button{background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;padding:4px 8px;-webkit-tap-highlight-color:transparent}
+.topbar h2{font-size:16px;font-weight:600}
+.inp{width:100%;background:var(--card);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:12px 14px;color:#fff;font-size:14px;font-family:inherit;outline:none}
+.inp:focus{border-color:var(--blue)}
+.inp.big{font-size:18px;font-family:'Courier New',monospace;padding:14px 16px;border-radius:12px}
+select.inp option{background:var(--card)}
+textarea.inp{min-height:80px;resize:vertical}
+.lbl{display:block;color:var(--text2);font-size:13px;font-weight:600;margin-bottom:6px}
+.fg{margin-bottom:16px}
+.crd{background:var(--card);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.crd-b{border:1px solid rgba(255,255,255,.06)}
+.dlg-ov{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.dlg-ov.open{display:flex}
+.dlg{background:var(--card);border-radius:16px;padding:24px;max-width:340px;width:100%}
+.dlg h3{font-size:16px;margin-bottom:10px}.dlg p{color:var(--text2);font-size:14px;margin-bottom:18px}
+.dlg-b{display:flex;gap:10px;justify-content:flex-end}
+.dlg-b button{background:none;border:none;color:var(--blue);font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;padding:8px 14px;border-radius:8px}
+.dlg-b button.dng{color:var(--red)}
+.tst{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:12px;font-size:13px;font-weight:600;z-index:300;opacity:0;transition:opacity .3s;pointer-events:none}
+.tst.show{opacity:1}.tst.ok{background:rgba(76,175,80,.9);color:#fff}.tst.err{background:rgba(233,57,53,.9);color:#fff}
+.hrs-big{text-align:center;padding:20px;background:var(--card);border-radius:20px;margin-bottom:20px}
+.hrs-n{font-family:'Courier New',monospace;font-size:32px;font-weight:700}
+.hrs-bar{height:10px;border-radius:5px;background:rgba(255,255,255,.08);margin:14px 0 6px;overflow:hidden}
+.hrs-fill{height:100%;border-radius:5px}
+.sr{display:flex;gap:10px;margin-bottom:10px}
+.sc{flex:1;background:var(--card);border-radius:12px;padding:14px;text-align:center}
+.sc .v{font-size:20px;font-weight:700;margin:6px 0 2px}.sc .l{font-size:11px;color:var(--text3)}
+.wk{background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.wk:active{background:var(--card2)}
+.pk{background:var(--card);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px}
+.pk-i{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px}
 </style>
 </head>
 <body>
-<div class="app" id="app">
-
-  <!-- MAIN SCREEN -->
-  <div class="screen active" id="screen-main">
-    <div class="header">
-      <button class="menu-btn" onclick="openMenu()">&#9776;</button>
-      <h1 id="header-phone">INTERKLIMA</h1>
-      <div style="width:40px"></div>
-    </div>
-
-    <div class="logo-wrap">
-      <img src="logo.png" alt="INTERKLIMA" onerror="this.style.display='none'">
-    </div>
-
-    <div style="text-align:center">
-      <div class="status-badge loading" id="gps-badge">
-        <span>&#128205;</span> <span id="gps-text">Sprawdzanie...</span>
-      </div>
-    </div>
-
-    <div class="timer-card" id="timer-card">
-      <div class="state-label idle" id="state-label">GOTOWY</div>
-      <div class="timer idle" id="timer">00:00:00</div>
-      <div id="break-section" style="display:none">
-        <div class="break-timer">
-          <span class="icon">&#9749;</span>
-          <span class="time" id="break-timer">00:00</span>
-        </div>
-        <div class="break-info" id="break-info">P&#322;atna przerwa: do 30 min</div>
-      </div>
-    </div>
-
-    <div class="actions" id="actions"></div>
-  </div>
-
-  <!-- SETTINGS SCREEN -->
-  <div class="screen" id="screen-settings">
-    <div class="back-bar">
-      <button class="back-btn" onclick="showScreen('main')">&#8592;</button>
-      <h2>Ustawienia</h2>
-    </div>
-    <div class="settings-wrap">
-      <label>Tw&#243;j numer telefonu:</label>
-      <div class="hint">Wpisz sw&#243;j numer &#8212; s&#322;u&#380;y jako identyfikator w systemie.</div>
-      <input type="tel" class="phone-input" id="phone-input" placeholder="np. 608651538" maxlength="12" inputmode="numeric" pattern="[0-9]*">
-      <div style="height:16px"></div>
-      <button class="btn big start" id="save-phone-btn" onclick="savePhone()">ZAPAMI&#280;TAJ</button>
-      <div class="save-msg" id="save-msg" style="display:none">
-        <span>&#9989;</span> Numer zapami&#281;tany. Mo&#380;esz startowa&#263; prac&#281;.
-      </div>
-    </div>
-    <div style="flex:1"></div>
-    <p style="text-align:center;color:var(--text3);font-size:11px;padding:16px">Wersja 1.3.0 &#8226; Dzia&#322; Produkcja &#8226; PWA</p>
-  </div>
-
-  <!-- HOLIDAYS SCREEN -->
-  <div class="screen" id="screen-holidays">
-    <div class="back-bar">
-      <button class="back-btn" onclick="showScreen('main')">&#8592;</button>
-      <h2>Dni wolne 2026</h2>
-    </div>
-    <div id="holidays-list"></div>
-  </div>
-
-  <!-- LEAVE REQUEST SCREEN -->
-  <div class="screen" id="screen-leave">
-    <div class="back-bar">
-      <button class="back-btn" onclick="showScreen('main')">&#8592;</button>
-      <h2>Wniosek urlopowy</h2>
-    </div>
-    <div class="form-group">
-      <label>Typ urlopu</label>
-      <select class="form-select" id="leave-type">
-        <option>Urlop wypoczynkowy</option>
-        <option>Urlop na &#380;&#261;danie</option>
-        <option>Urlop okoliczno&#347;ciowy</option>
-        <option>Urlop bezp&#322;atny</option>
-        <option>Zwolnienie lekarskie</option>
-        <option>Opieka nad dzieckiem</option>
-        <option>Inny</option>
-      </select>
-    </div>
-    <div class="form-group">
-      <label>Od</label>
-      <input type="date" class="form-input" id="leave-from">
-    </div>
-    <div class="form-group">
-      <label>Do</label>
-      <input type="date" class="form-input" id="leave-to">
-    </div>
-    <div class="form-group">
-      <label>Uwagi (opcjonalnie)</label>
-      <textarea class="form-textarea" id="leave-notes" placeholder="Dodatkowe informacje..."></textarea>
-    </div>
-    <button class="btn big start" onclick="sendLeaveRequest()">WY&#346;LIJ WNIOSEK</button>
-  </div>
-
-  <!-- LEAVE APPROVAL SCREEN -->
-  <div class="screen" id="screen-approval">
-    <div class="back-bar">
-      <button class="back-btn" onclick="showScreen('main')">&#8592;</button>
-      <h2>Zatwierdzanie urlop&#243;w</h2>
-      <button style="background:none;border:none;color:var(--blue);font-size:22px;cursor:pointer;margin-left:auto;padding:4px 8px" onclick="loadApprovals()">&#8635;</button>
-    </div>
-    <div id="approvals-list"></div>
-  </div>
+<div class="app">
+<div class="scr on" id="s-main">
+  <div class="header"><button class="menu-btn" onclick="openMenu()">&#9776;</button><h1 id="hdr-ph">INTERKLIMA</h1><div style="width:40px"></div></div>
+  <div class="logo-wrap"><img src="logo.png" alt="" onerror="this.style.display='none'"></div>
+  <div style="text-align:center"><div class="status-badge loading" id="gps-b"><span id="gps-t">Sprawdzanie...</span></div></div>
+  <div class="timer-card" id="tc"><div class="state-label idle" id="sl">GOTOWY</div><div class="timer idle" id="tm">00:00:00</div><div id="brk" style="display:none"><div class="break-box"><span>&#9749;</span> <span class="bt" id="bt">00:00</span><div class="bi" id="bi">P&#322;atna przerwa: do 30 min</div></div></div></div>
+  <div class="actions" id="act"></div>
 </div>
-
-<!-- MENU -->
-<div class="menu-overlay" id="menu-overlay" onclick="closeMenu()">
-  <div class="menu-panel" onclick="event.stopPropagation()">
-    <div class="menu-header">
-      <img src="logo.png" alt="INTERKLIMA" onerror="this.style.display='none'">
-      <p>Dzia&#322; Produkcja</p>
-    </div>
-    <button class="menu-item" onclick="closeMenu();showScreen('leave')"><span class="mi">&#127958;</span>Wniosek urlopowy</button>
-    <button class="menu-item" id="menu-approval" style="display:none" onclick="closeMenu();showScreen('approval');loadApprovals()"><span class="mi">&#9989;</span>Zatwierdzanie urlop&#243;w</button>
-    <button class="menu-item" onclick="closeMenu();showScreen('holidays')"><span class="mi">&#128197;</span>Dni wolne 2026</button>
-    <div class="menu-divider"></div>
-    <button class="menu-item" onclick="closeMenu();showScreen('settings')"><span class="mi">&#9881;</span>Ustawienia</button>
-  </div>
+<div class="scr" id="s-set"><div class="topbar"><button onclick="showS('main')">&#8592;</button><h2>Ustawienia</h2></div><label class="lbl">Numer telefonu:</label><p style="color:var(--text3);font-size:12px;margin-bottom:14px">Identyfikator w systemie</p><input type="tel" class="inp big" id="ph-in" placeholder="np. 608651538" maxlength="12" inputmode="numeric"><div style="height:16px"></div><button class="btn big green" id="sv-btn" onclick="savePh()">ZAPAMI&#280;TAJ</button><div id="sv-msg" style="display:none;background:rgba(76,175,80,.1);border:1px solid rgba(76,175,80,.25);border-radius:10px;padding:10px;margin-top:14px;color:var(--green);font-size:12px">&#9989; Zapisano</div><div style="flex:1"></div><p style="text-align:center;color:var(--text3);font-size:11px;padding:16px">v1.4.0 PWA</p></div>
+<div class="scr" id="s-hol"><div class="topbar"><button onclick="showS('main')">&#8592;</button><h2>Dni wolne 2026</h2></div><div id="hol-l"></div></div>
+<div class="scr" id="s-lv"><div class="topbar"><button onclick="showS('main')">&#8592;</button><h2>Wniosek urlopowy</h2></div><div class="fg"><label class="lbl">Typ</label><select class="inp" id="lv-t"><option>Urlop wypoczynkowy</option><option>Na &#380;&#261;danie</option><option>Okoliczno&#347;ciowy</option><option>Bezp&#322;atny</option><option>Zwolnienie lekarskie</option><option>Opieka nad dzieckiem</option><option>Inny</option></select></div><div class="fg"><label class="lbl">Od</label><input type="date" class="inp" id="lv-f"></div><div class="fg"><label class="lbl">Do</label><input type="date" class="inp" id="lv-to"></div><div class="fg"><label class="lbl">Uwagi</label><textarea class="inp" id="lv-n" placeholder="Opcjonalnie..."></textarea></div><button class="btn big green" onclick="sendLv()">WY&#346;LIJ WNIOSEK</button></div>
+<div class="scr" id="s-mlv"><div class="topbar"><button onclick="showS('main')">&#8592;</button><h2>Moje wnioski</h2><button onclick="ldMlv()" style="margin-left:auto">&#8635;</button></div><div id="mlv-l"></div></div>
+<div class="scr" id="s-mhr"><div class="topbar"><button onclick="showS('main')">&#8592;</button><h2>Moje godziny</h2><button onclick="ldMhr()" style="margin-left:auto">&#8635;</button></div><div id="mhr-c"></div></div>
+<div class="scr" id="s-apr"><div class="topbar"><button onclick="showS('main')">&#8592;</button><h2>Urlopy</h2><button onclick="ldApr()" style="margin-left:auto">&#8635;</button></div><div id="apr-l"></div></div>
+<div class="scr" id="s-wkr"><div class="topbar"><button onclick="showS('main')">&#8592;</button><h2>Pracownicy</h2></div><div id="wkr-l"></div></div>
+<div class="scr" id="s-pkg"><div class="topbar"><button onclick="showS('wkr')">&#8592;</button><h2 id="pkg-t">Pracownik</h2><button onclick="ldPkg(cPh,cNm)" style="margin-left:auto">&#8635;</button></div><div id="pkg-l"></div></div>
 </div>
-
-<!-- DIALOG -->
-<div class="dialog-overlay" id="dialog-overlay">
-  <div class="dialog">
-    <h3 id="dialog-title"></h3>
-    <p id="dialog-msg"></p>
-    <div class="dialog-btns" id="dialog-btns"></div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
-
+<div class="overlay" id="ov" onclick="closeMenu()"><div class="panel" onclick="event.stopPropagation()">
+  <div class="panel-hdr"><img src="logo.png" alt="" onerror="this.style.display='none'"><p>Dzia&#322; Produkcja</p></div>
+  <button class="mi" onclick="closeMenu();showS('lv')"><i>&#127958;</i>Wniosek urlopowy</button>
+  <button class="mi" onclick="closeMenu();showS('mlv');ldMlv()"><i>&#128203;</i>Moje wnioski</button>
+  <button class="mi" onclick="closeMenu();showS('mhr');ldMhr()"><i>&#9202;</i>Moje godziny</button>
+  <button class="mi" onclick="closeMenu();showS('hol')"><i>&#128197;</i>Dni wolne 2026</button>
+  <div class="divider"></div>
+  <button class="mi" id="m-apr" style="display:none" onclick="closeMenu();showS('apr');ldApr()"><i>&#9989;</i>Zatwierdzanie urlop&#243;w</button>
+  <button class="mi" id="m-wkr" style="display:none" onclick="closeMenu();showS('wkr');ldWkr()"><i>&#128101;</i>Lokalizacja pracownik&#243;w</button>
+  <div class="divider"></div>
+  <button class="mi" onclick="closeMenu();showS('set')"><i>&#9881;</i>Ustawienia</button>
+</div></div>
+<div class="dlg-ov" id="dov"><div class="dlg"><h3 id="dt"></h3><p id="dm"></p><div class="dlg-b" id="db"></div></div></div>
+<div class="tst" id="tst"></div>
 <script>
-const WEBHOOK = 'https://script.google.com/macros/s/AKfycbw_1NLFIFbJxxS7Pco1V3ZfD5zihnqAUJDTM-p-les9yX5FzymXOTB-Fxid0c4vrf-18Q/exec';
-const FIRMA_LAT = 52.236189;
-const FIRMA_LON = 20.839213;
-const ALERT_RADIUS = 300;
-const APPROVERS = ['795561356','608651538','690205199'];
-
-let state = 'idle'; // idle, working, onBreak
-let startTime = null;
-let breakStartTime = null;
-let totalBreakMs = 0;
-let phone = '';
-let timerInterval = null;
-let pingInterval = null;
-let gpsRefreshInterval = null;
-let leaveCheckInterval = null;
-
-// === INIT ===
-function init() {
-  phone = localStorage.getItem('ik_phone') || '';
-  const savedState = localStorage.getItem('ik_state');
-  const savedStart = localStorage.getItem('ik_start');
-  const savedBreakMs = parseInt(localStorage.getItem('ik_breakMs') || '0');
-  const savedBreakStart = localStorage.getItem('ik_breakStart');
-
-  if (phone) {
-    document.getElementById('header-phone').textContent = phone;
-    document.getElementById('phone-input').value = phone;
-    if (APPROVERS.includes(phone)) {
-      document.getElementById('menu-approval').style.display = '';
-    }
-  }
-
-  if (savedState && savedStart) {
-    startTime = new Date(savedStart);
-    totalBreakMs = savedBreakMs;
-    if (savedState === 'working') {
-      state = 'working';
-      startWorkTimer();
-      startPing();
-    } else if (savedState === 'onBreak') {
-      state = 'onBreak';
-      breakStartTime = savedBreakStart ? new Date(savedBreakStart) : new Date();
-      startBreakTimer();
-    }
-  }
-
-  if (!phone) {
-    showScreen('settings');
-  }
-
-  updateUI();
-  refreshGPS();
-  gpsRefreshInterval = setInterval(refreshGPS, 60000);
-  leaveCheckInterval = setInterval(checkLeaveStatus, 300000);
-  setTimeout(checkLeaveStatus, 10000);
-  renderHolidays();
+const W='https://script.google.com/macros/s/AKfycbw_1NLFIFbJxxS7Pco1V3ZfD5zihnqAUJDTM-p-les9yX5FzymXOTB-Fxid0c4vrf-18Q/exec';
+const FL=52.236189,FN=20.839213,AR=300,AP=['795561356','608651538','690205199'];
+let st='idle',sT=null,bT=null,bMs=0,ph='',tI=null,pI=null,gI=null,lI=null,cPh='',cNm='';
+function init(){
+  ph=localStorage.getItem('ik_ph')||'';
+  if(ph){document.getElementById('hdr-ph').textContent=ph;document.getElementById('ph-in').value=ph;if(AP.includes(ph)){document.getElementById('m-apr').style.display='';document.getElementById('m-wkr').style.display='';}}
+  const ss=localStorage.getItem('ik_st'),s=localStorage.getItem('ik_s'),bm=parseInt(localStorage.getItem('ik_bm')||'0'),bs=localStorage.getItem('ik_bs');
+  if(ss&&s){sT=new Date(s);bMs=bm;if(ss==='w'){st='working';wkTm();sPing();}else if(ss==='b'){st='onBreak';bT=bs?new Date(bs):new Date();bkTm();}}
+  if(!ph)showS('set');uUI();rGPS();gI=setInterval(rGPS,60000);lI=setInterval(chkLv,300000);setTimeout(chkLv,10000);rHol();
 }
-
-// === SAVE STATE ===
-function saveState() {
-  localStorage.setItem('ik_state', state);
-  if (startTime) localStorage.setItem('ik_start', startTime.toISOString());
-  else localStorage.removeItem('ik_start');
-  localStorage.setItem('ik_breakMs', totalBreakMs.toString());
-  if (breakStartTime) localStorage.setItem('ik_breakStart', breakStartTime.toISOString());
-  else localStorage.removeItem('ik_breakStart');
-}
-
-// === SCREENS ===
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('screen-' + name).classList.add('active');
-}
-
-function openMenu() { document.getElementById('menu-overlay').classList.add('open'); }
-function closeMenu() { document.getElementById('menu-overlay').classList.remove('open'); }
-
-// === GPS ===
-async function getPosition() {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) { reject('GPS niedostepny'); return; }
-    navigator.geolocation.getCurrentPosition(
-      pos => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-      err => reject(err.message),
-      { enableHighAccuracy: true, timeout: 15000 }
-    );
-  });
-}
-
-function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371000;
-  const dLat = (lat2-lat1)*Math.PI/180;
-  const dLon = (lon2-lon1)*Math.PI/180;
-  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
-  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-}
-
-async function refreshGPS() {
-  const badge = document.getElementById('gps-badge');
-  const text = document.getElementById('gps-text');
-  try {
-    const pos = await getPosition();
-    const dist = haversine(FIRMA_LAT, FIRMA_LON, pos.lat, pos.lon);
-    if (dist <= ALERT_RADIUS) {
-      badge.className = 'status-badge in';
-      text.textContent = 'W firmie \u2713';
-    } else {
-      badge.className = 'status-badge out';
-      text.textContent = 'Poza firm\u0105 \u26A0';
-    }
-  } catch(e) {
-    badge.className = 'status-badge off';
-    text.textContent = 'GPS niedost\u0119pny';
-  }
-}
-
-// === WEBHOOK ===
-async function sendWebhook(type, lat, lon, extra) {
-  const now = new Date();
-  const dd = String(now.getDate()).padStart(2,'0');
-  const mm = String(now.getMonth()+1).padStart(2,'0');
-  const yyyy = now.getFullYear();
-  const hh = String(now.getHours()).padStart(2,'0');
-  const mi = String(now.getMinutes()).padStart(2,'0');
-
-  const body = {
-    date: dd+'.'+mm+'.'+yyyy,
-    time: hh+':'+mi,
-    phone: phone,
-    type: type,
-    lat: String(lat),
-    lon: String(lon),
-    ...extra
-  };
-
-  // Apps Script redirect wymaga no-cors na iPhone Safari
-  try {
-    await fetch(WEBHOOK, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: {'Content-Type':'text/plain'},
-      body: JSON.stringify(body)
-    });
-    return true;
-  } catch(e) {
-    console.error('Webhook error:', e);
-    return false;
-  }
-}
-
-// === ACTIONS ===
-async function doStart() {
-  if (!phone) { toast('Wpisz numer w Ustawieniach','err'); return; }
-  updateUI('sending');
-  try {
-    let pos;
-    try {
-      pos = await getPosition();
-    } catch(gpsErr) {
-      // Jesli GPS nie dziala, wyslij bez lokalizacji
-      pos = { lat: 0, lon: 0 };
-      toast('GPS niedost\u0119pny - wysy\u0142am bez lokalizacji','err');
-    }
-    await sendWebhook('START', pos.lat, pos.lon);
-    startTime = new Date();
-    totalBreakMs = 0;
-    breakStartTime = null;
-    state = 'working';
-    saveState();
-    startWorkTimer();
-    startPing();
-    refreshGPS();
-    toast('Praca rozpocz\u0119ta \u2713','ok');
-  } catch(e) {
-    toast('B\u0142\u0105d: '+e,'err');
-  }
-  updateUI();
-}
-
-async function doStop() {
-  showDialog('Zako\u0144czy\u0107 prac\u0119?', 'Czas pracy: '+formatElapsed(), [
-    { text: 'Nie', action: () => closeDialog() },
-    { text: 'Tak, ko\u0144cz\u0119', cls: 'danger', action: async () => {
-      closeDialog();
-      updateUI('sending');
-      try {
-        let pos;
-        try { pos = await getPosition(); } catch(e) { pos = {lat:0,lon:0}; }
-        await sendWebhook('STOP', pos.lat, pos.lon);
-        clearInterval(timerInterval);
-        clearInterval(pingInterval);
-        state = 'idle';
-        startTime = null;
-        totalBreakMs = 0;
-        breakStartTime = null;
-        saveState();
-        refreshGPS();
-        toast('Praca zako\u0144czona \u2713','ok');
-      } catch(e) { toast('B\u0142\u0105d: '+e,'err'); }
-      updateUI();
-    }}
-  ]);
-}
-
-async function doBreak() {
-  updateUI('sending');
-  try {
-    let pos;
-    try { pos = await getPosition(); } catch(e) { pos = {lat:0,lon:0}; }
-    await sendWebhook('PRZERWA', pos.lat, pos.lon);
-    breakStartTime = new Date();
-    state = 'onBreak';
-    clearInterval(pingInterval);
-    saveState();
-    startBreakTimer();
-    toast('Przerwa rozpocz\u0119ta','ok');
-  } catch(e) { toast('B\u0142\u0105d: '+e,'err'); }
-  updateUI();
-}
-
-async function doEndBreak() {
-  updateUI('sending');
-  try {
-    let pos;
-    try { pos = await getPosition(); } catch(e) { pos = {lat:0,lon:0}; }
-    await sendWebhook('KONIEC_PRZERWY', pos.lat, pos.lon);
-    if (breakStartTime) totalBreakMs += (Date.now() - breakStartTime.getTime());
-    breakStartTime = null;
-    state = 'working';
-    saveState();
-    startWorkTimer();
-    startPing();
-    refreshGPS();
-    toast('Przerwa zako\u0144czona \u2713','ok');
-  } catch(e) { toast('B\u0142\u0105d: '+e,'err'); }
-  updateUI();
-}
-
-// === TIMERS ===
-function startWorkTimer() {
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    document.getElementById('timer').textContent = formatElapsed();
-  }, 1000);
-  updateUI();
-}
-
-function startBreakTimer() {
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    document.getElementById('timer').textContent = formatElapsed();
-    if (breakStartTime) {
-      const bSec = Math.floor((Date.now() - breakStartTime.getTime())/1000);
-      const bm = String(Math.floor(bSec/60)).padStart(2,'0');
-      const bs = String(bSec%60).padStart(2,'0');
-      document.getElementById('break-timer').textContent = bm+':'+bs;
-      const info = document.getElementById('break-info');
-      if (bSec >= 1800) {
-        info.textContent = '\u26A0 Przekroczono 30 min p\u0142atnej przerwy';
-        info.className = 'break-info warn';
-      } else {
-        info.textContent = 'P\u0142atna przerwa: do 30 min';
-        info.className = 'break-info';
-      }
-    }
-  }, 1000);
-  updateUI();
-}
-
-function formatElapsed() {
-  if (!startTime) return '00:00:00';
-  let ms = Date.now() - startTime.getTime() - totalBreakMs;
-  if (state === 'onBreak' && breakStartTime) ms -= (Date.now() - breakStartTime.getTime());
-  if (ms < 0) ms = 0;
-  const s = Math.floor(ms/1000);
-  const h = String(Math.floor(s/3600)).padStart(2,'0');
-  const m = String(Math.floor((s%3600)/60)).padStart(2,'0');
-  const sec = String(s%60).padStart(2,'0');
-  return h+':'+m+':'+sec;
-}
-
-// === PING ===
-function startPing() {
-  clearInterval(pingInterval);
-  pingInterval = setInterval(async () => {
-    if (state === 'working' && phone) {
-      try {
-        const pos = await getPosition();
-        await sendWebhook('PING', pos.lat, pos.lon);
-      } catch(e) {}
-    }
-  }, 3600000); // 1h
-}
-
-// === LEAVE CHECK ===
-async function checkLeaveStatus() {
-  if (!phone) return;
-  try {
-    const resp = await fetch(WEBHOOK+'?action=CHECK_URLOP&phone='+phone, {redirect:'follow',mode:'cors'});
-    if (resp.ok) {
-      const text = await resp.text();
-      if (text.includes('"notification"')) {
-        const data = JSON.parse(text);
-        if (data.notification && data.notification.length > 0) {
-          showDialog('Wniosek urlopowy', data.notification, [
-            { text: 'OK', action: () => closeDialog() }
-          ]);
-        }
-      }
-    }
-  } catch(e) {
-    // GET moze nie dzialac z CORS - cichy blad
-  }
-}
-
-// === UI UPDATE ===
-function updateUI(mode) {
-  const actions = document.getElementById('actions');
-  const timerCard = document.getElementById('timer-card');
-  const stateLabel = document.getElementById('state-label');
-  const timerEl = document.getElementById('timer');
-  const breakSection = document.getElementById('break-section');
-
-  if (mode === 'sending') {
-    actions.innerHTML = '<div class="spinner"><span class="dot"></span><span class="dot"></span><span class="dot"></span><p>Wysy\u0142anie...</p></div>';
-    return;
-  }
-
-  timerEl.textContent = formatElapsed();
-
-  if (state === 'idle') {
-    timerCard.className = 'timer-card';
-    stateLabel.className = 'state-label idle';
-    stateLabel.textContent = 'GOTOWY';
-    timerEl.className = 'timer idle';
-    breakSection.style.display = 'none';
-    actions.innerHTML = '<button class="btn big start" onclick="doStart()">&#9654; START PRACY</button>';
-  } else if (state === 'working') {
-    timerCard.className = 'timer-card working';
-    stateLabel.className = 'state-label working';
-    stateLabel.textContent = 'W PRACY';
-    timerEl.className = 'timer';
-    breakSection.style.display = 'none';
-    actions.innerHTML =
-      '<button class="btn big stop" onclick="doStop()">&#9632; STOP PRACY</button>'+
-      '<button class="btn small pause" onclick="doBreak()">&#10074;&#10074; PRZERWA</button>';
-  } else if (state === 'onBreak') {
-    timerCard.className = 'timer-card break';
-    stateLabel.className = 'state-label break';
-    stateLabel.textContent = 'PRZERWA';
-    timerEl.className = 'timer';
-    breakSection.style.display = '';
-    actions.innerHTML =
-      '<button class="btn big pause" onclick="doEndBreak()">&#9654; KONIEC PRZERWY</button>'+
-      '<button class="btn small stop" onclick="doStop()">&#9632; STOP PRACY</button>';
-  }
-}
-
-// === SETTINGS ===
-function savePhone() {
-  const val = document.getElementById('phone-input').value.replace(/\D/g,'').trim();
-  if (val.length < 9) { toast('Numer musi mie\u0107 min. 9 cyfr','err'); return; }
-  if (state !== 'idle') { toast('Nie mo\u017cna zmieni\u0107 numeru w trakcie pracy','err'); return; }
-  phone = val;
-  localStorage.setItem('ik_phone', phone);
-  document.getElementById('header-phone').textContent = phone;
-  document.getElementById('save-phone-btn').textContent = 'ZAPISANO \u2713';
-  document.getElementById('save-phone-btn').style.background = '#2e7d32';
-  document.getElementById('save-msg').style.display = 'flex';
-  if (APPROVERS.includes(phone)) document.getElementById('menu-approval').style.display = '';
-  toast('Numer zapisany: '+phone,'ok');
-}
-
-// === HOLIDAYS ===
-function renderHolidays() {
-  const holidays = [
-    {d:'2026-01-01',day:'1',m:'Stycze\u0144',wd:'Czwartek',n:'Nowy Rok'},
-    {d:'2026-01-06',day:'6',m:'Stycze\u0144',wd:'Wtorek',n:'Trzech Kr\u00f3li'},
-    {d:'2026-04-05',day:'5',m:'Kwiecie\u0144',wd:'Niedziela',n:'Wielkanoc'},
-    {d:'2026-04-06',day:'6',m:'Kwiecie\u0144',wd:'Poniedzia\u0142ek',n:'Poniedzia\u0142ek Wielkanocny'},
-    {d:'2026-05-01',day:'1',m:'Maj',wd:'Pi\u0105tek',n:'\u015awi\u0119to Pracy'},
-    {d:'2026-05-03',day:'3',m:'Maj',wd:'Niedziela',n:'\u015awi\u0119to Konstytucji'},
-    {d:'2026-05-14',day:'14',m:'Maj',wd:'Czwartek',n:'Zielone \u015awi\u0105tki'},
-    {d:'2026-06-04',day:'4',m:'Czerwiec',wd:'Czwartek',n:'Bo\u017ce Cia\u0142o'},
-    {d:'2026-08-15',day:'15',m:'Sierpie\u0144',wd:'Sobota',n:'Wniebowzi\u0119cie NMP'},
-    {d:'2026-11-01',day:'1',m:'Listopad',wd:'Niedziela',n:'Wszystkich \u015awi\u0119tych'},
-    {d:'2026-11-11',day:'11',m:'Listopad',wd:'\u015aroda',n:'\u015awi\u0119to Niepodleg\u0142o\u015bci'},
-    {d:'2026-12-25',day:'25',m:'Grudzie\u0144',wd:'Pi\u0105tek',n:'Bo\u017ce Narodzenie'},
-    {d:'2026-12-26',day:'26',m:'Grudzie\u0144',wd:'Sobota',n:'Drugi dzie\u0144 Bo\u017cego Narodzenia'},
-  ];
-  const today = new Date().toISOString().split('T')[0];
-  let html = '';
-  holidays.forEach(h => {
-    const past = h.d < today;
-    html += `<div class="holiday-item${past?' past':''}">
-      <div class="holiday-day ${past?'past':'future'}">${h.day}</div>
-      <div><div class="holiday-name">${h.n}</div><div class="holiday-date">${h.wd}, ${h.day} ${h.m}</div></div>
-    </div>`;
-  });
-  document.getElementById('holidays-list').innerHTML = html;
-}
-
-// === LEAVE REQUEST ===
-async function sendLeaveRequest() {
-  if (!phone) { toast('Wpisz numer w Ustawieniach','err'); return; }
-  const typ = document.getElementById('leave-type').value;
-  const od = document.getElementById('leave-from').value;
-  const doo = document.getElementById('leave-to').value;
-  const uwagi = document.getElementById('leave-notes').value;
-  if (!od || !doo) { toast('Wpisz daty','err'); return; }
-  try {
-    const pos = await getPosition().catch(()=>({lat:0,lon:0}));
-    await sendWebhook('URLOP', pos.lat, pos.lon, {
-      urlop_typ: typ, urlop_od: od, urlop_do: doo, urlop_uwagi: uwagi,
-      urlop_dni: Math.max(1, Math.ceil((new Date(doo)-new Date(od))/86400000)+1)
-    });
-    toast('Wniosek wys\u0142any \u2713','ok');
-    showScreen('main');
-  } catch(e) { toast('B\u0142\u0105d: '+e,'err'); }
-}
-
-// === LEAVE APPROVAL ===
-async function loadApprovals() {
-  const list = document.getElementById('approvals-list');
-  list.innerHTML = '<div class="spinner"><span class="dot"></span><span class="dot"></span><span class="dot"></span><p>\u0141adowanie...</p></div>';
-  try {
-    const resp = await fetch(WEBHOOK+'?action=LIST_URLOPY', {redirect:'follow'});
-    const text = await resp.text();
-    if (!text.includes('"requests"')) { list.innerHTML = '<p style="color:var(--text3);text-align:center;padding:40px">Nie uda\u0142o si\u0119 pobra\u0107</p>'; return; }
-    const data = JSON.parse(text);
-    if (!data.requests || data.requests.length === 0) {
-      list.innerHTML = '<p style="color:var(--text3);text-align:center;padding:40px">Brak wniosk\u00f3w</p>';
-      return;
-    }
-    let html = '';
-    data.requests.forEach(r => {
-      const st = (r.status||'NOWY').toUpperCase();
-      const isNew = st === 'NOWY';
-      const stCls = st.includes('ZATW') ? 'zatwierdzony' : st.includes('ODRZ') ? 'odrzucony' : 'nowy';
-      html += `<div class="approval-card${isNew?' new-req':''}">
-        <div class="approval-header">
-          <span class="approval-name">${r.pracownik||'?'}</span>
-          <span class="approval-status ${stCls}">${st}</span>
-        </div>
-        <div class="approval-info"><span class="ai">&#128197;</span>${r.typ||''}</div>
-        <div class="approval-info"><span class="ai">&#128198;</span>${r.od||''} - ${r.do||''}</div>
-        ${r.dni?'<div class="approval-info"><span class="ai">&#9202;</span>'+r.dni+' dni</div>':''}
-        ${r.uwagi?'<div class="approval-info"><span class="ai">&#128221;</span>'+r.uwagi+'</div>':''}
-        <div class="approval-info"><span class="ai">&#128197;</span>Wniosek z: ${r.data||''}</div>
-        ${isNew?`<div class="approval-btns">
-          <button class="btn small start" onclick="approveLeave(${r.row},'ZATWIERDZONY')">&#10003; ZATWIERD\u0179</button>
-          <button class="btn small stop" onclick="approveLeave(${r.row},'ODRZUCONY')">&#10007; ODRZU\u0106</button>
-        </div>`:''}
-      </div>`;
-    });
-    list.innerHTML = html;
-  } catch(e) { list.innerHTML = '<p style="color:var(--text3);text-align:center;padding:40px">B\u0142\u0105d: '+e+'</p>'; }
-}
-
-async function approveLeave(row, status) {
-  try {
-    await fetch(WEBHOOK+'?action=UPDATE_URLOP&row='+row+'&status='+status, {redirect:'follow'});
-    toast('Status zmieniony: '+status,'ok');
-    loadApprovals();
-  } catch(e) { toast('B\u0142\u0105d','err'); }
-}
-
-// === DIALOG ===
-function showDialog(title, msg, btns) {
-  document.getElementById('dialog-title').textContent = title;
-  document.getElementById('dialog-msg').textContent = msg;
-  const container = document.getElementById('dialog-btns');
-  container.innerHTML = '';
-  btns.forEach(b => {
-    const btn = document.createElement('button');
-    btn.textContent = b.text;
-    if (b.cls) btn.className = b.cls;
-    btn.onclick = b.action;
-    container.appendChild(btn);
-  });
-  document.getElementById('dialog-overlay').classList.add('open');
-}
-function closeDialog() { document.getElementById('dialog-overlay').classList.remove('open'); }
-
-// === TOAST ===
-function toast(msg, type) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast '+type+' show';
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// === START ===
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+function svSt(){localStorage.setItem('ik_st',st==='working'?'w':st==='onBreak'?'b':'i');if(sT)localStorage.setItem('ik_s',sT.toISOString());else localStorage.removeItem('ik_s');localStorage.setItem('ik_bm',bMs.toString());if(bT)localStorage.setItem('ik_bs',bT.toISOString());else localStorage.removeItem('ik_bs');}
+function showS(n){document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));document.getElementById('s-'+n).classList.add('on');}
+function openMenu(){document.getElementById('ov').classList.add('open');}
+function closeMenu(){document.getElementById('ov').classList.remove('open');}
+async function gPos(){return new Promise((r,j)=>{if(!navigator.geolocation){j('GPS');return;}navigator.geolocation.getCurrentPosition(p=>r({lat:p.coords.latitude,lon:p.coords.longitude}),e=>j(e.message),{enableHighAccuracy:true,timeout:15000});});}
+function hav(a,b,c,d){const R=6371000,x=(c-a)*Math.PI/180,y=(d-b)*Math.PI/180,z=Math.sin(x/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(y/2)**2;return R*2*Math.atan2(Math.sqrt(z),Math.sqrt(1-z));}
+async function rGPS(){const b=document.getElementById('gps-b'),t=document.getElementById('gps-t');try{const p=await gPos();if(hav(FL,FN,p.lat,p.lon)<=AR){b.className='status-badge in';t.textContent='W firmie \u2713';}else{b.className='status-badge out';t.textContent='Poza firm\u0105 \u26A0';}}catch(e){b.className='status-badge off';t.textContent='GPS niedost\u0119pny';}}
+async function sWh(type,lat,lon,ex){const n=new Date(),dd=String(n.getDate()).padStart(2,'0'),mm=String(n.getMonth()+1).padStart(2,'0'),hh=String(n.getHours()).padStart(2,'0'),mi=String(n.getMinutes()).padStart(2,'0');try{await fetch(W,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({date:dd+'.'+mm+'.'+n.getFullYear(),time:hh+':'+mi,phone:ph,type,lat:String(lat),lon:String(lon),...ex})});return true;}catch(e){return false;}}
+async function fGet(p){try{const r=await fetch(W+'?'+p,{redirect:'follow',mode:'cors'});if(r.ok)return await r.text();return null;}catch(e){return null;}}
+async function doStart(){if(!ph){tst('Wpisz numer','err');return;}uUI('ld');try{let p;try{p=await gPos();}catch(e){p={lat:0,lon:0};}await sWh('START',p.lat,p.lon);sT=new Date();bMs=0;bT=null;st='working';svSt();wkTm();sPing();rGPS();tst('Praca rozpocz\u0119ta \u2713','ok');}catch(e){tst('B\u0142\u0105d','err');}uUI();}
+async function doStop(){dlg('Zako\u0144czy\u0107?','Czas: '+fEl(),[{t:'Nie',a:()=>cDlg()},{t:'Tak',c:'dng',a:async()=>{cDlg();uUI('ld');try{let p;try{p=await gPos();}catch(e){p={lat:0,lon:0};}await sWh('STOP',p.lat,p.lon);clearInterval(tI);clearInterval(pI);st='idle';sT=null;bMs=0;bT=null;svSt();rGPS();tst('Zako\u0144czono \u2713','ok');}catch(e){tst('B\u0142\u0105d','err');}uUI();}}]);}
+async function doBrk(){uUI('ld');try{let p;try{p=await gPos();}catch(e){p={lat:0,lon:0};}await sWh('PRZERWA',p.lat,p.lon);bT=new Date();st='onBreak';clearInterval(pI);svSt();bkTm();tst('Przerwa','ok');}catch(e){tst('B\u0142\u0105d','err');}uUI();}
+async function doEnd(){uUI('ld');try{let p;try{p=await gPos();}catch(e){p={lat:0,lon:0};}await sWh('KONIEC_PRZERWY',p.lat,p.lon);if(bT)bMs+=(Date.now()-bT.getTime());bT=null;st='working';svSt();wkTm();sPing();rGPS();tst('Koniec przerwy \u2713','ok');}catch(e){tst('B\u0142\u0105d','err');}uUI();}
+function wkTm(){clearInterval(tI);tI=setInterval(()=>{document.getElementById('tm').textContent=fEl();},1000);uUI();}
+function bkTm(){clearInterval(tI);tI=setInterval(()=>{document.getElementById('tm').textContent=fEl();if(bT){const s=Math.floor((Date.now()-bT.getTime())/1000);document.getElementById('bt').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');const i=document.getElementById('bi');if(s>=1800){i.textContent='\u26A0 Przekroczono 30 min';i.className='bi w';}else{i.textContent='P\u0142atna przerwa: do 30 min';i.className='bi';}}},1000);uUI();}
+function fEl(){if(!sT)return'00:00:00';let ms=Date.now()-sT.getTime()-bMs;if(st==='onBreak'&&bT)ms-=(Date.now()-bT.getTime());if(ms<0)ms=0;const s=Math.floor(ms/1000);return String(Math.floor(s/3600)).padStart(2,'0')+':'+String(Math.floor((s%3600)/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
+function sPing(){clearInterval(pI);pI=setInterval(async()=>{if(st==='working'&&ph){try{const p=await gPos();await sWh('PING',p.lat,p.lon);}catch(e){}}},3600000);}
+async function chkLv(){if(!ph)return;try{const t=await fGet('action=CHECK_URLOP&phone='+ph);if(t&&t.includes('"notification"')){const d=JSON.parse(t);if(d.notification&&d.notification.length>0)dlg('Wniosek urlopowy',d.notification,[{t:'OK',a:()=>cDlg()}]);}}catch(e){}}
+function uUI(m){const a=document.getElementById('act'),tc=document.getElementById('tc'),sl=document.getElementById('sl'),te=document.getElementById('tm'),bk=document.getElementById('brk');
+  if(m==='ld'){a.innerHTML='<div class="spin"><span class="d"></span><span class="d"></span><span class="d"></span><p>Wysy\u0142anie...</p></div>';return;}te.textContent=fEl();
+  if(st==='idle'){tc.className='timer-card';sl.className='state-label idle';sl.textContent='GOTOWY';te.className='timer idle';bk.style.display='none';a.innerHTML='<button class="btn big green" onclick="doStart()">&#9654; START PRACY</button>';}
+  else if(st==='working'){tc.className='timer-card working';sl.className='state-label working';sl.textContent='W PRACY';te.className='timer';bk.style.display='none';a.innerHTML='<button class="btn big red" onclick="doStop()">&#9632; STOP PRACY</button><button class="btn sm orange" onclick="doBrk()">&#10074;&#10074; PRZERWA</button>';}
+  else if(st==='onBreak'){tc.className='timer-card break';sl.className='state-label break';sl.textContent='PRZERWA';te.className='timer';bk.style.display='';a.innerHTML='<button class="btn big orange" onclick="doEnd()">&#9654; KONIEC PRZERWY</button><button class="btn sm red" onclick="doStop()">&#9632; STOP PRACY</button>';}}
+function savePh(){const v=document.getElementById('ph-in').value.replace(/\D/g,'').trim();if(v.length<9){tst('Min 9 cyfr','err');return;}if(st!=='idle'){tst('Nie w trakcie pracy','err');return;}ph=v;localStorage.setItem('ik_ph',ph);document.getElementById('hdr-ph').textContent=ph;document.getElementById('sv-btn').textContent='ZAPISANO \u2713';document.getElementById('sv-btn').style.background='#2e7d32';document.getElementById('sv-msg').style.display='block';if(AP.includes(ph)){document.getElementById('m-apr').style.display='';document.getElementById('m-wkr').style.display='';}tst('Zapisano','ok');}
+function rHol(){const h=[{d:'2026-01-01',n:'Nowy Rok',x:'1 Sty, Czw'},{d:'2026-01-06',n:'Trzech Kr\u00f3li',x:'6 Sty, Wt'},{d:'2026-04-05',n:'Wielkanoc',x:'5 Kwi, Ndz'},{d:'2026-04-06',n:'Pon. Wielkanocny',x:'6 Kwi, Pon'},{d:'2026-05-01',n:'\u015awi\u0119to Pracy',x:'1 Maj, Pt'},{d:'2026-05-03',n:'Konstytucja',x:'3 Maj, Ndz'},{d:'2026-05-14',n:'Zielone \u015awi\u0105tki',x:'14 Maj, Czw'},{d:'2026-06-04',n:'Bo\u017ce Cia\u0142o',x:'4 Cze, Czw'},{d:'2026-08-15',n:'Wniebowzi\u0119cie',x:'15 Sie, Sob'},{d:'2026-11-01',n:'Wszystkich \u015awi\u0119tych',x:'1 Lis, Ndz'},{d:'2026-11-11',n:'Niepodleg\u0142o\u015b\u0107',x:'11 Lis, \u015ar'},{d:'2026-12-25',n:'Bo\u017ce Narodzenie',x:'25 Gru, Pt'},{d:'2026-12-26',n:'2. dzie\u0144 \u015awi\u0105t',x:'26 Gru, Sob'}];const td=new Date().toISOString().split('T')[0];let o='';h.forEach(i=>{const p=i.d<td;o+=`<div style="display:flex;align-items:center;gap:14px;background:var(--card);border-radius:12px;padding:12px 16px;margin-bottom:8px;${p?'opacity:.4':''}"><div style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;${p?'background:rgba(255,255,255,.04);color:var(--text3)':'background:rgba(233,57,53,.12);color:#ef5350'}">${i.d.split('-')[2]*1}</div><div><div style="font-weight:600;font-size:14px">${i.n}</div><div style="color:var(--text3);font-size:12px">${i.x}</div></div></div>`;});document.getElementById('hol-l').innerHTML=o;}
+async function sendLv(){if(!ph){tst('Wpisz numer','err');return;}const t=document.getElementById('lv-t').value,f=document.getElementById('lv-f').value,to=document.getElementById('lv-to').value,n=document.getElementById('lv-n').value;if(!f||!to){tst('Wpisz daty','err');return;}try{const p=await gPos().catch(()=>({lat:0,lon:0}));await sWh('URLOP',p.lat,p.lon,{urlop_typ:t,urlop_od:f,urlop_do:to,urlop_uwagi:n,urlop_dni:Math.max(1,Math.ceil((new Date(to)-new Date(f))/86400000)+1)});tst('Wys\u0142ano \u2713','ok');showS('main');}catch(e){tst('B\u0142\u0105d','err');}}
+async function ldMlv(){const l=document.getElementById('mlv-l');l.innerHTML='<div class="spin"><span class="d"></span><span class="d"></span><span class="d"></span></div>';const t=await fGet('action=MOJE_URLOPY&phone='+ph);if(!t||!t.includes('"requests"')){l.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px">Brak</p>';return;}const d=JSON.parse(t);if(!d.requests||!d.requests.length){l.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px">Brak wniosk\u00f3w</p>';return;}let o='';d.requests.reverse().forEach(r=>{const s=(r.status||'NOWY').toUpperCase();let c='var(--orange)',i='\u23F3';if(s.includes('ZATW')){c='var(--green)';i='\u2705';}if(s.includes('ODRZ')){c='var(--red)';i='\u274C';}o+=`<div class="crd crd-b" style="border-color:${c}30"><div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:${c};font-weight:700;font-size:13px">${i} ${s}</span><span style="color:var(--text3);font-size:11px">${r.data||''}</span></div><div style="font-weight:600">${r.typ||''}</div><div style="color:var(--text2);font-size:13px;margin-top:4px">${r.od||''} - ${r.do||''} (${r.dni||'?'} dni)</div></div>`;});l.innerHTML=o;}
+async function ldMhr(){const c=document.getElementById('mhr-c');c.innerHTML='<div class="spin"><span class="d"></span><span class="d"></span><span class="d"></span></div>';const t=await fGet('action=MOJE_GODZINY&phone='+ph);if(!t||!t.includes('"hours"')){c.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px">Brak</p>';return;}const d=JSON.parse(t),h=d.hours||0,tg=d.target||0,dy=d.days||0,wd=d.workDays||0,pct=tg>0?Math.min(100,Math.round(h/tg*100)):0,g=h>=tg*0.9,cl=g?'var(--green)':'var(--orange)',mn=['','Stycze\u0144','Luty','Marzec','Kwiecie\u0144','Maj','Czerwiec','Lipiec','Sierpie\u0144','Wrzesie\u0144','Pa\u017adziernik','Listopad','Grudzie\u0144'];c.innerHTML=`<p style="text-align:center;color:var(--text3);font-size:14px;letter-spacing:2px;margin-bottom:16px">${mn[d.month||0]||''}</p><div class="hrs-big"><div class="hrs-n" style="color:${cl}">${h.toFixed(1)} / ${tg} h</div><div class="hrs-bar"><div class="hrs-fill" style="width:${pct}%;background:${cl}"></div></div><div style="color:${cl};font-size:13px">${pct}%</div></div><div class="sr"><div class="sc"><div class="v">${dy}</div><div class="l">Przepracowane</div></div><div class="sc"><div class="v">${wd}</div><div class="l">Robocze</div></div></div><div class="sr"><div class="sc"><div class="v">${h.toFixed(1)}h</div><div class="l">Godziny</div></div><div class="sc"><div class="v">${Math.max(0,tg-h).toFixed(1)}h</div><div class="l">Pozosta\u0142o</div></div></div>`;}
+async function ldApr(){const l=document.getElementById('apr-l');l.innerHTML='<div class="spin"><span class="d"></span><span class="d"></span><span class="d"></span></div>';const t=await fGet('action=LIST_URLOPY');if(!t||!t.includes('"requests"')){l.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px">Brak</p>';return;}const d=JSON.parse(t);if(!d.requests||!d.requests.length){l.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px">Brak wniosk\u00f3w</p>';return;}let o='';d.requests.forEach(r=>{const s=(r.status||'NOWY').toUpperCase(),nw=s==='NOWY',sc=s.includes('ZATW')?'zatwierdzony':s.includes('ODRZ')?'odrzucony':'nowy',scl=sc==='zatwierdzony'?'rgba(76,175,80,.15);color:var(--green)':sc==='odrzucony'?'rgba(233,57,53,.15);color:var(--red)':'rgba(255,167,38,.15);color:var(--orange)';o+=`<div class="crd crd-b" ${nw?'style="border-color:rgba(255,167,38,.3)"':''}><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-weight:700;font-size:15px">${r.pracownik||'?'}</span><span style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:8px;background:${scl}">${s}</span></div><div style="color:var(--text2);font-size:12px">&#128197; ${r.typ||''}</div><div style="color:var(--text2);font-size:12px">&#128198; ${r.od||''} - ${r.do||''}</div>${nw?`<div style="display:flex;gap:10px;margin-top:12px"><button class="btn sm green" onclick="apLv(${r.row},'ZATWIERDZONY')">&#10003; ZATWIERD\u0179</button><button class="btn sm red" onclick="apLv(${r.row},'ODRZUCONY')">&#10007; ODRZU\u0106</button></div>`:''}</div>`;});l.innerHTML=o;}
+async function apLv(row,s){try{await fGet('action=UPDATE_URLOP&row='+row+'&status='+s);tst(s,'ok');ldApr();}catch(e){tst('B\u0142\u0105d','err');}}
+async function ldWkr(){const l=document.getElementById('wkr-l');l.innerHTML='<div class="spin"><span class="d"></span><span class="d"></span><span class="d"></span></div>';const t=await fGet('action=LISTA_PRACOWNIKOW');if(!t||!t.includes('"workers"')){l.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px">Brak</p>';return;}const d=JSON.parse(t);let o='';d.workers.forEach(w=>{o+=`<div class="wk" onclick="ldPkg('${w.phone}','${w.name}')"><div style="width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center">&#128100;</div><div><div style="font-weight:600;font-size:14px">${w.name}</div><div style="color:var(--text3);font-size:12px">${w.phone}</div></div><div style="margin-left:auto;color:var(--text3)">&#8250;</div></div>`;});l.innerHTML=o;}
+async function ldPkg(p,n){cPh=p;cNm=n;document.getElementById('pkg-t').textContent=n;showS('pkg');const l=document.getElementById('pkg-l');l.innerHTML='<div class="spin"><span class="d"></span><span class="d"></span><span class="d"></span></div>';const t=await fGet('action=PINGI&phone='+p);if(!t||!t.includes('"pings"')){l.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px">Brak</p>';return;}const d=JSON.parse(t);if(!d.pings||!d.pings.length){l.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px">Brak danych</p>';return;}let o='';d.pings.forEach(p=>{let c='var(--blue)',i='&#128205;';if(p.type==='START'){c='var(--green)';i='&#9654;';}else if(p.type==='STOP'||p.type==='STOP_AUTO'){c='var(--red)';i='&#9632;';}else if(p.alert){c='var(--orange)';}o+=`<div class="pk"><div class="pk-i" style="background:${c}20;color:${c}">${i}</div><div><div style="display:flex;gap:8px;align-items:center"><span style="font-weight:700;font-size:12px;color:${c}">${p.type}</span><span style="color:var(--text2);font-size:12px">${p.date} ${p.time}</span></div>${p.alert?'<div style="color:var(--orange);font-size:11px">'+p.alert+'</div>':''}</div></div>`;});l.innerHTML=o;}
+function dlg(ti,ms,bt){document.getElementById('dt').textContent=ti;document.getElementById('dm').textContent=ms;const c=document.getElementById('db');c.innerHTML='';bt.forEach(b=>{const e=document.createElement('button');e.textContent=b.t;if(b.c)e.className=b.c;e.onclick=b.a;c.appendChild(e);});document.getElementById('dov').classList.add('open');}
+function cDlg(){document.getElementById('dov').classList.remove('open');}
+function tst(m,t){const e=document.getElementById('tst');e.textContent=m;e.className='tst '+t+' show';setTimeout(()=>e.classList.remove('show'),3000);}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 </script>
 </body>
 </html>
